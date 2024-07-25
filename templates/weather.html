@@ -69,6 +69,7 @@
             background-color: #007bff;
             color: #fff;
             cursor: pointer;
+            margin-right: 10px;
         }
         .weather-info {
             background-color: rgba(0, 0, 0, 0.7);
@@ -133,6 +134,7 @@
         <label for="city">城市:</label>
         <input type="text" id="city" name="city" placeholder="输入城市名">
         <button type="button" id="search-button">查询</button>
+        <button type="button" id="clear-button">清除</button>
     </div>
 
     <div class="container">
@@ -226,6 +228,10 @@
                 console.error('Error:', error);
                 alert('无法获取天气信息，请检查城市名称并重试。');
             });
+    });
+
+    document.getElementById('clear-button').addEventListener('click', function() {
+        document.getElementById('city').value = '';
     });
 </script>
 
