@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Website</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: url('https://images.unsplash.com/photo-1506748686214-e9df14d4d9d0?fit=crop&w=1350&q=80') no-repeat center center fixed;
+            background-size: cover;
+            color: #fff;
+            margin: 0;
+            padding: 0;
+        }
+        .overlay {
+            background: rgba(0, 0, 0, 0.6); /* Dark overlay to improve readability */
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 20px;
+            border-radius: 10px;
+        }
+        header nav a {
+            color: #fff;
+            margin: 0 15px;
+            text-decoration: none;
+        }
+        .search-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 20px 0;
+        }
+        .search-container label {
+            margin-right: 10px;
+            font-size: 1.2em;
+        }
+        .search-container input[type="text"] {
+            padding: 10px;
+            font-size: 1.2em;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            margin-right: 10px;
+            width: 400px;
+        }
+        .search-container button {
+            padding: 10px 20px;
+            font-size: 1.2em;
+            border: none;
+            border-radius: 5px;
+            background-color: #007bff;
+            color: #fff;
+            cursor: pointer;
+        }
+        .weather-info {
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .weather-info h1 {
+            font-size: 3.5em;
+            margin: 0;
+        }
+        .weather-info h2 {
+            font-size: 2.5em;
+            margin: 10px 0;
+        }
+        .weather-details {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            padding: 20px 0;
+        }
+        .weather-details div {
+            text-align: center;
+            flex: 1;
+            font-size: 1.2em;
+        }
+        .forecast {
+            display: flex;
+            justify-content: space-between;
+            overflow-x: auto;
+        }
+        .forecast .day {
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 10px;
+            margin: 0 5px;
+            border-radius: 10px;
+            width: 200px; /* Increased width */
+            text-align: center;
+            font-size: 1.1em;
+        }
+    </style>
+</head>
+<body>
+    <div class="overlay"></div>
+    <header>
+        <div class="logo" style="">
+            <h1>天气预测</h1>
+        </div>
+        <nav>
+            <!-- <a href="#">北京天气</a>
+            <a href="#">上海天气</a>
+            <a href="#">广州天气</a>
+            <a href="#">深圳天气</a>
+            <a href="#">三亚天气</a> -->
+        </nav>
+    </header>
+
+    <div class="search-container" id="weather-form">
+        <label for="city">城市:</label>
+        <input type="text" id="city" name="city" placeholder="输入城市名">
+        <button type="button" id="search-button">查询</button>
+    </div>
+
+    <div class="container">
+        <div class="weather-info">
+            <h1 id="weather-h1"></h1>
+            <h2 id="temperature"></h2>
+            <div class="weather-details">
+                <div>
+                    <p id="min-temperature">最低温度：</p>
+                    <p id="wind-direction">风向：</p>
+                    <p id="sunrise">湿度：</p>
+                </div>
+                <div>
+                    <p id="max-temperature">最高温度：</p>
+                    <p id="wind-speed">风力：</p>
+                    <p id="sunset">地面大气压：</p>
+                </div>
+            </div>
+            <p id="aqi">空气质量指数：</p>
+        </div>
+
+        <div class="forecast" id="forecast-container">
+            <!-- 添加预测天数的容器 -->
+        </div>
+    </div>
+</body>
+
+<script>
+    document.getElementById('search-button').addEventListener('click', function() {
+        const city = document.getElementById('city').value;
+
+        const api_key = "092c7b55c7f64fd5181bf34380242559";
+        const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${api_key}&units=metric&lang=zh_cn`;
+        const forecast_url = `https://api.openweathermap.org/data/2.5/forecast?q=${city}&appid=${api_key}&units=metric&lang=zh_cn`;
+
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                console.log(data); // 打印数据以便调试
+                if (data.cod !== 200) {
+                    throw new Error(data.message);
+                }
+
+                const main_weather = data.weather[0].main;
+                const temperature = data.main.temp;
+                const min_temp = data.main.temp_min;
+                const max_temp = data.main.temp_max;
+                const wind_speed = data.wind.speed;
+                const wind_direction = data.wind.deg;
+                const humidity = data.main.humidity;
+                const pressure = data.main.grnd_level;
+
+                document.getElementById('weather-h1').textContent = `${city} - ${main_weather}`;
+                document.getElementById('temperature').textContent = `${temperature}°C`;
+                document.getElementById('min-temperature').textContent = `最低温度：${min_temp}°C`;
+                document.getElementById('max-temperature').textContent = `最高温度：${max_temp}°C`;
+                document.getElementById('wind-direction').textContent = `风向：${wind_direction}°`;
+                document.getElementById('wind-speed').textContent = `风力：${wind_speed}级`;
+                document.getElementById('sunrise').textContent = `湿度：${humidity}%`;
+                document.getElementById('sunset').textContent = `地面大气压：${pressure}hPa`;
+                document.getElementById('aqi').textContent = `空气质量指数：25`;
+
+                fetch(forecast_url)
+                    .then(response => response.json())
+                    .then(forecastData => {
+                        const forecastContainer = document.getElementById('forecast-container');
+                        forecastContainer.innerHTML = ''; // 清空之前的内容
+
+                        const forecasts = forecastData.list.filter(item => item.dt_txt.includes("12:00:00"));
+                        for (let i = 0; i < 4; i++) {
+                            const forecast = forecasts[i];
+                            const date = new Date(forecast.dt * 1000);
+                            date.setDate(date.getDate() + 1); // 在原始日期上加一天
+                            const formattedDate = date.toLocaleDateString();
+                            const temp_min = forecast.main.temp_min;
+                            const temp_max = forecast.main.temp_max;
+                            const description = forecast.weather[0].description;
+
+                            const dayDiv = document.createElement('div');
+                            dayDiv.className = 'day';
+                            dayDiv.innerHTML = `
+                                <p>${formattedDate}</p>
+                                <p>${temp_min}°C - ${temp_max}°C</p>
+                                <p>${description}</p>
+                            `;
+                            forecastContainer.appendChild(dayDiv);
+                        }
+                    });
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('无法获取天气信息，请检查城市名称并重试。');
+            });
+    });
+</script>
+
+</html>
